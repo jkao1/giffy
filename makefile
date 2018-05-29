@@ -1,5 +1,5 @@
 test: robot.mdl lex.py main.py matrix.py mdl.py display.py draw.py gmath.py yacc.py
-	python main.py simple.mdl
+	python main.py hi.txt
 
 clean:
 	rm *pyc *out parsetab.py

@@ -4,9 +4,10 @@ from display import *
 from matrix import *
 from draw import *
 
-num_frames = 1
+num_frames = None
 basename = 'hello_world'
 is_animating = False
+knobs = []
 
 """======== first_pass( commands, symbols ) ==========
 
@@ -37,8 +38,10 @@ def first_pass( commands ):
             basename = args[0]
         elif op == 'vary':
             is_animating = True
-            print '"Frames" command is not present. Exiting program.'
-            sys.exit(1)
+
+            if num_frames is None:
+                print '"Frames" command is not present. Exiting program.'
+                sys.exit(1)
 
 
 """======== second_pass( commands ) ==========
@@ -63,10 +66,10 @@ def second_pass( commands, num_frames ):
     knobs = [{}] * num_frames
 
     for c in commands:
-        op, args = command['op'], command['args']
+        op, args = c['op'], c['args']
 
         if op == 'vary':
-            knob = command['knob']
+            knob = c['knob']
             start_frame, end_frame = int(args[0]), int(args[1])
             start_val, end_val = args[2], args[3]
 
@@ -130,24 +133,24 @@ def run(filename):
     second_pass(commands, num_frames)
 
     for f in range(num_frames):
+        print 'Frame: %d/%d' % (f + 1, num_frames)
         for k in knobs[f]:
             symbols[k][1] = knobs[f][k]
 
         for command in commands:
-            print command
             c = command['op']
             args = command['args']
 
             if args is not None:
                 args = command['args'][:]
 
-                if (command.get('knob', None) is not None and
+            if args is not None and (command.get('knob', None) is not None and
                     c in 'move|scale|rotate'):
-                    k = command['knob']
+                k = command['knob']
 
-                    for i in range(len(args)):
-                        if not isinstance(args[i], str):
-                            args[i] *= symbols[k][i]
+                for i in range(len(args)):
+                    if not isinstance(args[i], str):
+                        args[i] *= symbols[k][1]
 
             if c == 'box':
                 if isinstance(args[0], str):
@@ -221,7 +224,7 @@ def run(filename):
         if is_animating:
             save_extension(
                 screen,
-                './my_gif/%s%03d.png' % (basename, f),
+                './anim/%s%03d.png' % (basename, f),
             )
 
         # reset code from beginning
@@ -233,3 +236,6 @@ def run(filename):
         zbuffer = new_zbuffer()
         tmp = []
         step_3d = 20
+
+    if is_animating:
+        make_animation(basename)
