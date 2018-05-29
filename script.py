@@ -63,7 +63,7 @@ def first_pass( commands ):
   ===================="""
 def second_pass( commands, num_frames ):
     global knobs
-    knobs = [{}] * num_frames
+    knobs = [{} for _ in range(num_frames)]
 
     for c in commands:
         op, args = c['op'], c['args']
@@ -76,10 +76,11 @@ def second_pass( commands, num_frames ):
             inc = (end_val - start_val) / (end_frame - start_frame)
             v = start_val
 
-            for i in range(start_frame, end_frame):
+            for i in range(start_frame, end_frame + 1):
+                if i == end_frame:
+                    v = end_val
                 knobs[i][knob] = v
                 v += inc
-            v = end_val
 
 
 def run(filename):
